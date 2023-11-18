@@ -66,6 +66,7 @@ import Toast from "./Toast.vue";
 </template>
 
 <script lang="ts">
+// @ts-ignore
 import bcrypt from "bcryptjs";
 
 export default {
