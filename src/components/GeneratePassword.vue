@@ -1,6 +1,39 @@
 <script setup lang="ts">
 import Button from './Button.vue';
-import Toast from "./Toast.vue";
+import { ref, onMounted } from 'vue';
+import {useToastStore} from "../store/ToastStore.ts";
+import {generatePassword} from "../utils/GeneratePassword.ts";
+
+const toastStore = useToastStore();
+
+const hasUppercase = ref(true);
+const hasLowercase = ref(true);
+const hasNumbers = ref(true);
+const hasSpecialCharacters = ref(false);
+const passwordLength = ref(12);
+const password = ref('');
+
+onMounted(() => {
+  getPassword();
+});
+
+function getPassword() {
+  password.value = generatePassword({
+    hasUppercase: hasUppercase.value,
+    hasLowercase: hasLowercase.value,
+    hasNumbers: hasNumbers.value,
+    hasSpecialCharacters: hasSpecialCharacters.value,
+    passwordLength: passwordLength.value,
+  });
+}
+
+async function copyPassword() {
+  if (password.value.length === 0) return;
+
+  await navigator.clipboard.writeText(password.value);
+
+  toastStore.show('Copied to clipboard!');
+}
 </script>
 
 <template>
@@ -96,88 +129,7 @@ import Toast from "./Toast.vue";
   </div>
 
   <div class="flex justify-center mt-7">
-    <Button text="Generate" @click="generatePassword" />
+    <Button text="Generate" @click="getPassword" />
   </div>
 
-  <Toast
-      message="Password copied to clipboard"
-      class="fixed right-5 top-5"
-      @closeToast="closeToast"
-      :class="[isToastActive ? 'block' : 'hidden']"
-  />
 </template>
-
-<script lang="ts">
-
-export default {
-  data() {
-    return {
-      hasNumbers: true, 
-      hasUppercase: true,
-      hasLowercase: true,
-      hasSpecialCharacters: false,
-      passwordLength: 12,
-      isEncryptActive: false,
-      isGenerateActive: true,
-      isToastActive: false,
-      password: '',
-    };
-  },
-  methods: {
-    generatePassword() {
-      let password = ""; 
-
-      const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      const lowercase = "abcdefghijklmnopqrstuvwxyz";
-      const numbers = "0123456789";
-      const specialCharacters = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
-
-      let characters = "";
-
-      if (this.hasUppercase) {
-        characters += uppercase;
-      }
-
-      if (this.hasLowercase) {
-        characters += lowercase;
-      }
-
-      if (this.hasNumbers) {
-        characters += numbers;
-      }
-
-      if (this.hasSpecialCharacters) {
-        characters += specialCharacters;
-      }
-
-      const charactersLength = characters.length;
-
-      for (let i = 0; i < this.passwordLength; i++) {
-        password += characters.charAt(Math.floor(Math.random() * charactersLength));
-      }
-
-      this.password = password;
-    },
-
-    closeToast() {
-      this.isToastActive = false;
-    },
-
-    async copyPassword() {
-      if (this.password.length === 0) return;
-
-      await navigator.clipboard.writeText(this.password);
-
-      if (this.isToastActive) return;
-
-      this.isToastActive = true;
-
-      setTimeout(() => {
-        this.isToastActive = false;
-      }, 2000);
-    },
-
-  },
-};
-
-</script>

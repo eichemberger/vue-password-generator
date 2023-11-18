@@ -3,6 +3,9 @@ import Header from './components/Header.vue';
 import Button from './components/Button.vue';
 import GeneratePassword from './components/GeneratePassword.vue';
 import EncryptPassword from './components/EncryptPassword.vue';
+import Toast from "./components/Toast.vue";
+
+
 </script>
 
 <template>
@@ -33,6 +36,7 @@ import EncryptPassword from './components/EncryptPassword.vue';
     <GeneratePassword v-if="isGenerateActive" />
     <EncryptPassword v-else />
 
+    <Toast />
   </div>
 
 </template>
