@@ -1,6 +1,32 @@
 <script setup lang="ts">
+// @ts-ignore
+import bcrypt from "bcryptjs";
 import Button from "./Button.vue";
-import Toast from "./Toast.vue";
+
+import { ref } from "vue";
+import {useToastStore} from "../store/ToastStore.ts";
+
+const toastStore = useToastStore();
+
+const encryptedPassword = ref("");
+const rawPassword = ref("");
+
+function encryptPassword() {
+  if (rawPassword.value.trim().length === 0) {
+    return;
+  }
+
+  const salt = bcrypt.genSaltSync(10);
+  encryptedPassword.value = bcrypt.hashSync(rawPassword.value.trim(), salt);
+}
+
+async function copyPassword() {
+  if (encryptedPassword.value.length === 0) return;
+
+  await navigator.clipboard.writeText(encryptedPassword.value);
+
+  toastStore.show("Copied to clipboard!");
+}
 </script>
 
 <template>
@@ -56,57 +82,7 @@ import Toast from "./Toast.vue";
     <Button text="Encrypt" @click="encryptPassword" />
   </div>
 
-  <Toast
-      message="Password copied to clipboard"
-      class="fixed right-5 top-5"
-      @closeToast="closeToast"
-      :class="[isToastActive ? 'block' : 'hidden']"
-  />
-
 </template>
-
-<script lang="ts">
-// @ts-ignore
-import bcrypt from "bcryptjs";
-
-export default {
-  data() {
-    return {
-      encryptedPassword: "",
-      rawPassword: "",
-      isToastActive: false,
-    };
-  },
-  methods: {
-    encryptPassword() {
-      if (this.rawPassword.trim().length === 0) {
-        return;
-      }
-
-      const salt = bcrypt.genSaltSync(10);
-      this.encryptedPassword = bcrypt.hashSync(this.rawPassword.trim(), salt);
-    },
-
-    async copyPassword() {
-      if (this.encryptedPassword.length === 0) return;
-
-      await navigator.clipboard.writeText(this.encryptedPassword);
-
-      if (this.isToastActive) return;
-
-      this.isToastActive = true;
-
-      setTimeout(() => {
-        this.isToastActive = false;
-      }, 2000);
-    },
-
-    closeToast() {
-      this.isToastActive = false;
-    },
-  },
-};
-</script>
 
 <style scoped>
 input[type="text"] {
