@@ -26,7 +26,3 @@ const closeToast = () => {
     </button>
   </div>
 </template>
-
-<script lang="ts">
-
-</script>
